@@ -1,10 +1,7 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.WSA;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 using static UnityEngine.GraphicsBuffer;
 
 public class EnemyController : MonoBehaviour
@@ -14,16 +11,18 @@ public class EnemyController : MonoBehaviour
     public float speed = 2f;
     private Rigidbody rb;
     private Vector3 velocityChange;
-    private AnimatorController animator;
+    private Animator animator;
     private Collider collider;
     private Rigidbody killed;
+    private Vector3 targetPoint;
+    private Quaternion targetRotation;
 
     [SerializeField] private GameObject target;
     private Vector3 targetPos;
     private void Start()
     {
         rb= GetComponent<Rigidbody>();  
-        animator= GetComponent<AnimatorController>();
+        animator= GetComponent<Animator>();
         collider = GetComponent<Collider>();
         target = GameObject.FindGameObjectWithTag("Player");
     }
@@ -63,9 +62,8 @@ public class EnemyController : MonoBehaviour
     }
     private void LookAtObject()
     {
-        targetPos.x=target.transform.position.x;
-        targetPos.z = target.transform.position.z;
-
-        transform.LookAt(targetPos);
+        targetPoint = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z) - transform.position;
+        targetRotation = Quaternion.LookRotation(targetPoint, Vector3.up);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speedRotation);
     }
 }
